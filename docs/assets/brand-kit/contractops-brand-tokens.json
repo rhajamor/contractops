@@ -1,0 +1,39 @@
+{
+  "name": "ContractOps Brand Tokens",
+  "version": "1.0.0",
+  "logo": {
+    "primary_mark": "contractops-logo-mark.svg",
+    "wordmark_dark": "contractops-wordmark-dark.svg",
+    "wordmark_light": "contractops-wordmark-light.svg"
+  },
+  "colors": {
+    "background": {
+      "deep_navy": "#060916",
+      "surface_navy": "#0C1228",
+      "card_navy": "#121B37"
+    },
+    "primary": {
+      "primary_blue": "#5F86FF",
+      "primary_blue_strong": "#3F6DFF"
+    },
+    "accent": {
+      "teal": "#1FE8D6",
+      "teal_soft": "#45E7DE"
+    },
+    "text": {
+      "text_primary": "#E9EFFF",
+      "text_muted": "#A4B4DE"
+    }
+  },
+  "typography": {
+    "font_family": "Inter, system-ui, -apple-system, Segoe UI, sans-serif",
+    "heading_weights": [700, 800],
+    "body_weights": [400, 500, 600]
+  },
+  "usage_rules": [
+    "Do not alter logo geometry.",
+    "Maintain clearspace equal to the shield height around the logo.",
+    "Prefer dark wordmark on dark surfaces and light wordmark on light surfaces.",
+    "Avoid adding drop shadows to text lockups."
+  ]
+}

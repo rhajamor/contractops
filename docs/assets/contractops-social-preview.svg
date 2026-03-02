@@ -1,0 +1,47 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="72" y1="42" x2="1154" y2="611" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1738" />
+      <stop offset="1" stop-color="#161044" />
+    </linearGradient>
+    <linearGradient id="brand" x1="268" y1="157" x2="463" y2="364" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8AB4FF" />
+      <stop offset="1" stop-color="#45E7DE" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(960 84) rotate(138.143) scale(402.572 351.936)">
+      <stop stop-color="#3AA7FF" stop-opacity="0.55" />
+      <stop offset="1" stop-color="#3AA7FF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect width="1200" height="630" fill="url(#glow)" />
+
+  <circle cx="302" cy="251" r="126" stroke="url(#brand)" stroke-opacity="0.45" stroke-width="9" />
+  <circle cx="428" cy="251" r="12" fill="#A9DBFF" />
+  <rect x="215" y="166" width="174" height="174" rx="46" fill="#0E1D43" stroke="url(#brand)" stroke-width="7" />
+  <path d="M302 204L347 225V258C347 290 326 314 302 324C278 314 257 290 257 258V225L302 204Z" fill="url(#brand)" />
+  <path d="M302 238V286" stroke="#F3F8FF" stroke-width="9" stroke-linecap="round" />
+  <path d="M280 262H324" stroke="#F3F8FF" stroke-width="9" stroke-linecap="round" />
+
+  <text x="486" y="222" fill="#EAF2FF" font-family="Inter, Arial, sans-serif" font-size="73" font-weight="800" letter-spacing="0.8">ContractOps</text>
+  <text x="486" y="285" fill="#AFC3E8" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="600">
+    CI-grade reliability for AI agent releases
+  </text>
+
+  <g fill="#C8D8F6" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="600">
+    <text x="489" y="372">Behavior Contracts</text>
+    <text x="489" y="422">Baseline Replay</text>
+    <text x="489" y="472">Release Gates</text>
+  </g>
+  <g fill="#4EE0DA">
+    <circle cx="458" cy="362" r="7" />
+    <circle cx="458" cy="412" r="7" />
+    <circle cx="458" cy="462" r="7" />
+  </g>
+
+  <rect x="74" y="548" width="1052" height="1" fill="#5E76AF" fill-opacity="0.42" />
+  <text x="74" y="585" fill="#88A1D3" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="500">
+    contractops.github.io
+  </text>
+</svg>

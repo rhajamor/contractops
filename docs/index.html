@@ -8,6 +8,32 @@
     name="description"
     content="ContractOps is the change-control and release-gating layer for AI agents: behavior contracts, baseline replay, release scoring, and CI/CD enforcement."
   />
+  <meta name="keywords" content="AI reliability, release gates, AI governance, baseline replay, contract testing, CI for agents" />
+  <meta name="author" content="ContractOps" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="theme-color" content="#0b1227" />
+  <link rel="canonical" href="https://contractops.github.io/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://contractops.github.io/" />
+  <meta property="og:title" content="ContractOps | CI-Grade Reliability for AI Agents" />
+  <meta
+    property="og:description"
+    content="Behavior contracts, baseline replay, release scoring, and CI/CD gates for safe AI agent deployments."
+  />
+  <meta property="og:image" content="https://contractops.github.io/assets/contractops-social-preview.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="ContractOps" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ContractOps | CI-Grade Reliability for AI Agents" />
+  <meta
+    name="twitter:description"
+    content="Ship AI agent changes with deterministic release gates: contracts, baselines, and explainable scoring."
+  />
+  <meta name="twitter:image" content="https://contractops.github.io/assets/contractops-social-preview.svg" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -21,6 +47,22 @@
   <link rel="stylesheet" href="styles.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script defer src="main.js"></script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ContractOps",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "url": "https://contractops.github.io/",
+      "description": "CI-grade behavior contracts, baseline replay, and release gates for AI agents.",
+      "softwareVersion": "0.2.0",
+      "author": {
+        "@type": "Organization",
+        "name": "ContractOps"
+      }
+    }
+  </script>
 </head>
 <body>
   <div class="orb orb-one"></div>
@@ -29,7 +71,24 @@
 
   <header class="top-nav">
     <a class="brand" href="#top" aria-label="ContractOps home">
-      <span class="brand-icon"><i class="fa-solid fa-shield-halved"></i></span>
+      <span class="brand-icon animated-logo" aria-hidden="true">
+        <svg viewBox="0 0 96 96" class="logo-svg">
+          <defs>
+            <linearGradient id="coBlue" x1="0%" x2="100%" y1="0%" y2="100%">
+              <stop offset="0%" stop-color="#78a8ff" />
+              <stop offset="100%" stop-color="#2fdde6" />
+            </linearGradient>
+          </defs>
+          <g class="logo-orbit">
+            <circle cx="48" cy="48" r="33" fill="none" stroke="url(#coBlue)" stroke-opacity="0.45" stroke-width="2.5" />
+            <circle cx="81" cy="48" r="3.5" fill="#8ad8ff" />
+          </g>
+          <rect x="24" y="24" width="48" height="48" rx="13" fill="rgba(12,23,49,0.86)" stroke="url(#coBlue)" stroke-width="2" />
+          <path d="M48 34L61 40V49C61 58 55 65 48 68C41 65 35 58 35 49V40L48 34Z" fill="url(#coBlue)" />
+          <path d="M48 44V58" stroke="#f2f7ff" stroke-width="2.8" stroke-linecap="round" />
+          <path d="M42 51H54" stroke="#f2f7ff" stroke-width="2.8" stroke-linecap="round" />
+        </svg>
+      </span>
       <span>ContractOps</span>
     </a>
 
@@ -42,6 +101,7 @@
       <a href="#capabilities">Capabilities</a>
       <a href="#benchmarks">Benchmarks</a>
       <a href="#documentation">Docs</a>
+      <a href="#brand-kit">Brand Kit</a>
       <a href="#roadmap">Roadmap</a>
     </nav>
   </header>
@@ -51,6 +111,27 @@
       <div class="hero-grid">
         <div class="hero-copy">
           <p class="eyebrow">AI Release Governance Platform</p>
+          <div class="hero-logo-line">
+            <span class="hero-logo animated-logo" aria-hidden="true">
+              <svg viewBox="0 0 96 96" class="logo-svg">
+                <defs>
+                  <linearGradient id="heroBlue" x1="0%" x2="100%" y1="0%" y2="100%">
+                    <stop offset="0%" stop-color="#89b4ff" />
+                    <stop offset="100%" stop-color="#46e8dc" />
+                  </linearGradient>
+                </defs>
+                <g class="logo-orbit">
+                  <circle cx="48" cy="48" r="33" fill="none" stroke="url(#heroBlue)" stroke-opacity="0.5" stroke-width="2.6" />
+                  <circle cx="81" cy="48" r="3.7" fill="#a6dbff" />
+                </g>
+                <rect x="24" y="24" width="48" height="48" rx="13" fill="rgba(10,20,44,0.82)" stroke="url(#heroBlue)" stroke-width="2.2" />
+                <path d="M48 34L61 40V49C61 58 55 65 48 68C41 65 35 58 35 49V40L48 34Z" fill="url(#heroBlue)" />
+                <path d="M48 44V58" stroke="#f2f7ff" stroke-width="2.8" stroke-linecap="round" />
+                <path d="M42 51H54" stroke="#f2f7ff" stroke-width="2.8" stroke-linecap="round" />
+              </svg>
+            </span>
+            <p class="hero-logo-caption">Trusted release control for agentic systems</p>
+          </div>
           <h1>Ship AI agent changes with confidence, not guesswork.</h1>
           <p class="hero-description">
             ContractOps gives your team a deterministic gate before production: behavior contracts,
@@ -360,6 +441,59 @@ contractops run --scenarios examples/ --executor mock-v1 --format json</code></p
       </article>
     </section>
 
+    <section id="brand-kit" class="section">
+      <div class="section-header">
+        <p class="eyebrow">Brand Kit</p>
+        <h2>Animated identity system and downloadable assets</h2>
+      </div>
+
+      <div class="brandkit-grid">
+        <article class="brandkit-card">
+          <h3><i class="fa-solid fa-cubes"></i> Logo Assets</h3>
+          <p>Core marks optimized for docs, product UI, social cards, and dark/light backgrounds.</p>
+          <ul class="download-list">
+            <li>
+              <a href="assets/brand-kit/contractops-logo-mark.svg" download>
+                <i class="fa-solid fa-download"></i> Download Logo Mark (SVG)
+              </a>
+            </li>
+            <li>
+              <a href="assets/brand-kit/contractops-wordmark-dark.svg" download>
+                <i class="fa-solid fa-download"></i> Download Wordmark Dark (SVG)
+              </a>
+            </li>
+            <li>
+              <a href="assets/brand-kit/contractops-wordmark-light.svg" download>
+                <i class="fa-solid fa-download"></i> Download Wordmark Light (SVG)
+              </a>
+            </li>
+          </ul>
+        </article>
+
+        <article class="brandkit-card">
+          <h3><i class="fa-solid fa-palette"></i> Brand Tokens</h3>
+          <p>Design tokens and usage references for product teams and design systems.</p>
+          <ul class="download-list">
+            <li>
+              <a href="assets/brand-kit/contractops-brand-tokens.json" download>
+                <i class="fa-solid fa-download"></i> Download Brand Tokens (JSON)
+              </a>
+            </li>
+            <li>
+              <a href="assets/brand-kit/BRANDKIT.md" download>
+                <i class="fa-solid fa-download"></i> Download Brand Guidelines (MD)
+              </a>
+            </li>
+            <li>
+              <a href="assets/contractops-social-preview.svg" download>
+                <i class="fa-solid fa-download"></i> Download Social Preview Card (SVG)
+              </a>
+            </li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
     <section id="roadmap" class="section">
       <div class="section-header">
         <p class="eyebrow">Roadmap</p>
@@ -414,6 +548,31 @@ contractops run --scenarios examples/ --executor mock-v1 --format json</code></p
           <h4><i class="fa-solid fa-lightbulb"></i> Future</h4>
           <p>Build enterprise policy intelligence and risk analytics control plane.</p>
           <div class="progress"><span style="width: 24%"></span></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="domain" class="section domain-section">
+      <div class="section-header">
+        <p class="eyebrow">Domain + Launch</p>
+        <h2>Canonical URL strategy for <code>contractops.github.io</code></h2>
+      </div>
+      <div class="domain-grid">
+        <article class="domain-card">
+          <h3><i class="fa-solid fa-link"></i> Canonical GitHub Pages URL</h3>
+          <p>
+            For a root URL of <code>https://contractops.github.io/</code>, the repository must be
+            hosted as <code>contractops/contractops.github.io</code> (owner + repo naming rule).
+          </p>
+          <p class="domain-note">Status: configuration-ready, pending repository naming alignment.</p>
+        </article>
+        <article class="domain-card">
+          <h3><i class="fa-solid fa-globe"></i> Custom Domain (CNAME)</h3>
+          <p>
+            This site is CNAME-ready. Update <code>docs/CNAME</code> with your external domain
+            (for example <code>www.contractops.ai</code>) and map DNS to GitHub Pages.
+          </p>
+          <p class="domain-note">Status: enabled with placeholder target for current launch request.</p>
         </article>
       </div>
     </section>

@@ -30,6 +30,20 @@ Then open `http://localhost:8000`.
 3. In repository settings, open **Pages** and set **Build and deployment** to **GitHub Actions**.
 4. The included workflow (`.github/workflows/pages.yml`) deploys `docs/` automatically on push.
 
+### Publish as `contractops.github.io` (no username path)
+
+To get the exact root URL `https://contractops.github.io/`, GitHub requires:
+
+1. GitHub owner/account/org name: `contractops`
+2. Repository name: `contractops.github.io`
+
+If those naming rules are not met, GitHub Pages will publish as a project site under a user/org path instead.
+
+### CNAME custom domain setup
+
+The site now includes `docs/CNAME` and is currently set to `contractops.github.io`.
+Update that file to your real external domain when ready (for example `www.contractops.ai`) and point DNS to GitHub Pages.
+
 ## Why This Exists
 
 Most AI platforms provide one slice of reliability -- observability, evals, or guardrails. Teams still lack a practical **change control** layer that combines:
