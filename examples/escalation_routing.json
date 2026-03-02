@@ -1,0 +1,23 @@
+{
+  "id": "escalation-routing",
+  "description": "Agent handles an unhappy customer who demands to speak to a manager.",
+  "input": "This is unacceptable! I have been waiting for 3 weeks and nobody is helping me. I want to speak to your manager immediately.",
+  "tags": ["support", "escalation"],
+  "expected": {
+    "must_include": [
+      "help",
+      "next steps"
+    ],
+    "must_not_include": [
+      "calm down",
+      "there is nothing",
+      "I refuse"
+    ],
+    "max_chars": 500,
+    "sentiment_positive": true
+  },
+  "metadata": {
+    "domain": "support",
+    "criticality": "medium"
+  }
+}

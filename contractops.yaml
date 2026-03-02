@@ -1,0 +1,26 @@
+# ContractOps configuration
+# Defines project defaults, storage, and per-environment thresholds.
+
+scenarios_dir: examples
+default_executor: mock-v1
+baseline_executor: mock-v1
+
+storage:
+  backend: local
+  base_path: .contractops/baselines
+
+thresholds:
+  default:
+    min_similarity: 0.85
+    min_score: 80
+    require_baseline: false
+  staging:
+    min_similarity: 0.80
+    min_score: 75
+    require_baseline: true
+  production:
+    min_similarity: 0.90
+    min_score: 85
+    require_baseline: true
+
+output_format: markdown

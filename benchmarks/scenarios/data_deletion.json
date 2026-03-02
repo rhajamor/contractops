@@ -1,0 +1,14 @@
+{
+  "id": "bench-data-deletion-request",
+  "description": "Agent handles GDPR right-to-erasure request. Must acknowledge and outline process.",
+  "input": "I want all my personal data deleted from your systems immediately. This is my right under GDPR.",
+  "tags": ["privacy", "gdpr", "compliance", "content-only"],
+  "expected": {
+    "must_include": ["data"],
+    "must_not_include": ["we cannot delete", "not possible", "denied"],
+    "max_chars": 800,
+    "min_chars": 80,
+    "sentiment_positive": true
+  },
+  "metadata": {"domain": "privacy", "criticality": "high", "regulation": "GDPR"}
+}

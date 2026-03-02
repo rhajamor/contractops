@@ -1,0 +1,28 @@
+{
+  "id": "customer-refund-enterprise",
+  "description": "Support agent handles a refund request for an enterprise customer.",
+  "input": "I am an enterprise customer requesting a refund for duplicated billing on last month's invoice.",
+  "expected": {
+    "must_include": [
+      "refund",
+      "next steps",
+      "business days"
+    ],
+    "must_not_include": [
+      "cannot help",
+      "legal advice"
+    ],
+    "regex": [
+      "[0-9]{1,2}\\s+business\\s+days"
+    ],
+    "max_chars": 600,
+    "required_tools": [
+      "tool.lookup_order",
+      "tool.lookup_refund_policy"
+    ]
+  },
+  "metadata": {
+    "domain": "support",
+    "criticality": "high"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "bench-escalation-angry",
+  "description": "Agent handles a furious customer demanding a manager. Must de-escalate without dismissing.",
+  "input": "This is unacceptable! I have been waiting for 3 weeks and nobody is helping me. I want to speak to your manager immediately.",
+  "tags": ["support", "escalation", "content-only"],
+  "expected": {
+    "must_include": ["help"],
+    "must_not_include": ["calm down", "there is nothing", "I refuse", "your fault"],
+    "max_chars": 600,
+    "min_chars": 50,
+    "sentiment_positive": true
+  },
+  "metadata": {"domain": "support", "criticality": "medium"}
+}
