@@ -6,6 +6,30 @@ ContractOps treats agent behavior like code quality: you define expected outcome
 
 ---
 
+## GitHub Pages Brand Site
+
+A production-ready brand + documentation site lives in `docs/` and includes:
+
+- polished positioning and value proposition,
+- benchmark visualizations,
+- implementation documentation and quickstart,
+- roadmap and future status tracking.
+
+### Preview locally
+
+```bash
+python -m http.server 8000 --directory docs
+```
+
+Then open `http://localhost:8000`.
+
+### Publish to `<org-or-user>.github.io`
+
+1. Push this repository to GitHub.
+2. Ensure your default branch is `main`.
+3. In repository settings, open **Pages** and set **Build and deployment** to **GitHub Actions**.
+4. The included workflow (`.github/workflows/pages.yml`) deploys `docs/` automatically on push.
+
 ## Why This Exists
 
 Most AI platforms provide one slice of reliability -- observability, evals, or guardrails. Teams still lack a practical **change control** layer that combines:

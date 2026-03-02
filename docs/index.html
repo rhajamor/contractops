@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ContractOps | CI-Grade Reliability for AI Agents</title>
+  <meta
+    name="description"
+    content="ContractOps is the change-control and release-gating layer for AI agents: behavior contracts, baseline replay, release scoring, and CI/CD enforcement."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script defer src="main.js"></script>
+</head>
+<body>
+  <div class="orb orb-one"></div>
+  <div class="orb orb-two"></div>
+  <div class="orb orb-three"></div>
+
+  <header class="top-nav">
+    <a class="brand" href="#top" aria-label="ContractOps home">
+      <span class="brand-icon"><i class="fa-solid fa-shield-halved"></i></span>
+      <span>ContractOps</span>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav id="siteNav">
+      <a href="#value">Value</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="#documentation">Docs</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">AI Release Governance Platform</p>
+          <h1>Ship AI agent changes with confidence, not guesswork.</h1>
+          <p class="hero-description">
+            ContractOps gives your team a deterministic gate before production: behavior contracts,
+            baseline replay, and release scoring that blocks risky model/prompt/orchestration
+            changes before they hit customers.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#documentation">
+              <i class="fa-solid fa-book-open"></i> Start with Docs
+            </a>
+            <a class="btn btn-secondary" href="#benchmarks">
+              <i class="fa-solid fa-chart-line"></i> View Evidence
+            </a>
+          </div>
+          <div class="signal-row">
+            <span><i class="fa-solid fa-circle-check"></i> CI-native release gates</span>
+            <span><i class="fa-solid fa-circle-check"></i> Baseline drift detection</span>
+            <span><i class="fa-solid fa-circle-check"></i> Multi-executor support</span>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <p class="panel-label">Release Decision Snapshot</p>
+          <h3>How ContractOps decides ship / no-ship</h3>
+          <ul class="decision-list">
+            <li><i class="fa-solid fa-shield"></i> All hard contracts must pass</li>
+            <li><i class="fa-solid fa-code-compare"></i> Similarity must stay in tolerance</li>
+            <li><i class="fa-solid fa-scale-balanced"></i> Composite score must clear threshold</li>
+          </ul>
+          <div class="metric-tiles">
+            <div class="metric-tile">
+              <p class="metric-value" data-count="10">0</p>
+              <p class="metric-label">Contract types</p>
+            </div>
+            <div class="metric-tile">
+              <p class="metric-value" data-count="5">0</p>
+              <p class="metric-label">Core CLI commands</p>
+            </div>
+            <div class="metric-tile">
+              <p class="metric-value" data-count="7">0</p>
+              <p class="metric-label">Models benchmarked</p>
+            </div>
+            <div class="metric-tile">
+              <p class="metric-value" data-count="40">0</p>
+              <p class="metric-label">Best pass rate (%)</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="kpi-strip">
+        <article class="kpi-card">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <h4>Core Risk</h4>
+          <p>Silent regressions after model/version/prompt changes.</p>
+        </article>
+        <article class="kpi-card">
+          <i class="fa-solid fa-plug-circle-check"></i>
+          <h4>Control Point</h4>
+          <p>One contract gate inside every CI/CD pipeline.</p>
+        </article>
+        <article class="kpi-card">
+          <i class="fa-solid fa-bolt"></i>
+          <h4>Business Impact</h4>
+          <p>Lower rollback rates, faster approvals, safer upgrades.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="value" class="section">
+      <div class="section-header">
+        <p class="eyebrow">Value Proposition</p>
+        <h2>A complete change-control layer for AI behavior</h2>
+      </div>
+
+      <div class="value-grid">
+        <article class="value-card">
+          <span class="value-icon"><i class="fa-solid fa-file-signature"></i></span>
+          <h3>Express critical behavior as contracts</h3>
+          <p>
+            Encode compliance and quality expectations as deterministic checks (required phrases,
+            forbidden content, regex, max length, tool invocation, latency and schema constraints).
+          </p>
+        </article>
+        <article class="value-card">
+          <span class="value-icon"><i class="fa-solid fa-repeat"></i></span>
+          <h3>Replay known-good baselines for every change</h3>
+          <p>
+            Treat agent behavior like snapshot testing. Capture baseline outputs and compare each
+            candidate run against prior approved behavior to expose drift before release.
+          </p>
+        </article>
+        <article class="value-card">
+          <span class="value-icon"><i class="fa-solid fa-gauge-high"></i></span>
+          <h3>Score release readiness with one decision metric</h3>
+          <p>
+            Combine hard contract pass rate and semantic similarity into one release score that is
+            easy for engineering, security, and leadership to reason about.
+          </p>
+        </article>
+        <article class="value-card">
+          <span class="value-icon"><i class="fa-solid fa-code-branch"></i></span>
+          <h3>Gate merges and deployments in CI/CD</h3>
+          <p>
+            Integrate directly into pull requests and deployment pipelines with machine-readable
+            reports, JUnit output, and GitHub-compatible status reporting.
+          </p>
+        </article>
+      </div>
+
+      <article class="before-after">
+        <h3>What changes with ContractOps in the loop</h3>
+        <div class="before-after-grid">
+          <div>
+            <p class="mini-title">Without ContractOps</p>
+            <ul>
+              <li>Model updates approved with limited confidence</li>
+              <li>Regression detection happens after customer impact</li>
+              <li>Compliance checks vary by team and ad hoc scripts</li>
+              <li>Go/no-go decisions are subjective and inconsistent</li>
+            </ul>
+          </div>
+          <div>
+            <p class="mini-title">With ContractOps</p>
+            <ul>
+              <li>Every release gets deterministic contract checks</li>
+              <li>Baseline drift is caught pre-production</li>
+              <li>Governance standardizes across teams and providers</li>
+              <li>Ship decisions are auditable and explainable</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="capabilities" class="section">
+      <div class="section-header">
+        <p class="eyebrow">Capabilities</p>
+        <h2>Built for production teams running real AI workflows</h2>
+      </div>
+
+      <div class="capability-grid">
+        <article class="capability-card">
+          <i class="fa-solid fa-list-check"></i>
+          <h3>Contract engine</h3>
+          <p>10+ assertion types for behavior, formatting, tooling, latency, and safety policies.</p>
+        </article>
+        <article class="capability-card">
+          <i class="fa-solid fa-database"></i>
+          <h3>Baseline storage</h3>
+          <p>Local, S3, and GCS backends with immutable run artifacts for auditability.</p>
+        </article>
+        <article class="capability-card">
+          <i class="fa-solid fa-wrench"></i>
+          <h3>Executor adapters</h3>
+          <p>Mock executors, OpenAI-compatible APIs, Anthropic, LangChain, and generic HTTP.</p>
+        </article>
+        <article class="capability-card">
+          <i class="fa-solid fa-layer-group"></i>
+          <h3>Threshold profiles</h3>
+          <p>Environment-aware reliability budgets for dev, staging, and production gates.</p>
+        </article>
+        <article class="capability-card">
+          <i class="fa-solid fa-file-code"></i>
+          <h3>Multi-format reports</h3>
+          <p>Markdown, JSON, JUnit XML, and GitHub-ready summaries for CI consumption.</p>
+        </article>
+        <article class="capability-card">
+          <i class="fa-solid fa-people-group"></i>
+          <h3>Team workflow fit</h3>
+          <p>Scenario tagging, baseline replay, and command-line ergonomics for rapid adoption.</p>
+        </article>
+      </div>
+
+      <article class="pipeline">
+        <h3>System flow</h3>
+        <ol>
+          <li><span>1</span>Scenario contracts define expected outcomes and constraints.</li>
+          <li><span>2</span>Executor runs candidate behavior and returns output + tool traces.</li>
+          <li><span>3</span>Assertion engine validates hard checks deterministically.</li>
+          <li><span>4</span>Baseline comparator measures behavior drift and similarity.</li>
+          <li><span>5</span>Reporter computes release score and emits pass/fail evidence.</li>
+          <li><span>6</span>CI gate blocks unsafe releases and surfaces actionable reasons.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section id="benchmarks" class="section">
+      <div class="section-header">
+        <p class="eyebrow">Benchmark Evidence</p>
+        <h2>ContractOps data proves why release gating matters</h2>
+      </div>
+
+      <div class="benchmark-summary">
+        <article>
+          <p class="benchmark-title">Top model pass rate</p>
+          <p class="benchmark-value">40%</p>
+          <p class="benchmark-note">llama3.1:8b on content-focused contracts</p>
+        </article>
+        <article>
+          <p class="benchmark-title">Hardest scenario</p>
+          <p class="benchmark-value">0 / 7 passed</p>
+          <p class="benchmark-note">MFA bypass contract</p>
+        </article>
+        <article>
+          <p class="benchmark-title">Universal failure mode</p>
+          <p class="benchmark-value">Verbosity overflow</p>
+          <p class="benchmark-note">`max_chars` exceeded across most models</p>
+        </article>
+      </div>
+
+      <div class="chart-grid">
+        <article class="chart-card">
+          <h3>Pass Rate vs Contract Compliance</h3>
+          <canvas id="passContractChart" aria-label="Pass rate and contract rate by model"></canvas>
+        </article>
+        <article class="chart-card">
+          <h3>Latency vs Throughput Tradeoffs</h3>
+          <canvas id="latencyThroughputChart" aria-label="Latency and throughput by model"></canvas>
+        </article>
+        <article class="chart-card">
+          <h3>Most Frequent Failure Sources</h3>
+          <canvas id="failureModesChart" aria-label="Failure mode distribution"></canvas>
+        </article>
+      </div>
+      <p class="chart-footnote">
+        Source: <code>benchmarks/RESULTS.md</code> and benchmark artifacts in this repository.
+      </p>
+    </section>
+
+    <section id="documentation" class="section">
+      <div class="section-header">
+        <p class="eyebrow">Documentation</p>
+        <h2>Implementation guide from first run to CI enforcement</h2>
+      </div>
+
+      <div class="docs-layout">
+        <article class="doc-card">
+          <h3><i class="fa-solid fa-rocket"></i> Quick Start</h3>
+          <pre><code>pip install -e .
+contractops init
+contractops baseline --scenario examples/customer_refund.json --executor mock-v1
+contractops check --scenario examples/customer_refund.json --executor mock-v2
+contractops run --scenarios examples/ --executor mock-v1 --format json</code></pre>
+        </article>
+
+        <article class="doc-card">
+          <h3><i class="fa-solid fa-file-lines"></i> Scenario Contract Example</h3>
+          <pre><code>{
+  "id": "customer-refund-enterprise",
+  "input": "Customer asks for enterprise refund",
+  "expected": {
+    "must_include": ["refund", "next steps", "business days"],
+    "must_not_include": ["cannot help", "legal advice"],
+    "regex": ["[0-9]{1,2}\\s+business\\s+days"],
+    "max_chars": 600,
+    "required_tools": ["tool.lookup_order", "tool.lookup_refund_policy"]
+  }
+}</code></pre>
+        </article>
+
+        <article class="doc-card">
+          <h3><i class="fa-brands fa-github"></i> CI / GitHub Action</h3>
+          <pre><code>- name: Run ContractOps
+  uses: ./.github
+  with:
+    command: run
+    scenarios: examples/
+    executor: openai:gpt-4o-mini
+    format: github
+    post-pr-comment: "true"</code></pre>
+        </article>
+
+        <article class="doc-card">
+          <h3><i class="fa-solid fa-terminal"></i> Core Commands</h3>
+          <ul class="command-list">
+            <li><code>init</code> — scaffold config, scenarios, and baseline directories</li>
+            <li><code>baseline</code> — capture known-good behavior for a scenario</li>
+            <li><code>check</code> — compare candidate output to contracts + baseline</li>
+            <li><code>run</code> — execute full suite with aggregate reporting</li>
+            <li><code>validate</code> — lint scenario definition quality before runtime</li>
+          </ul>
+        </article>
+      </div>
+
+      <article class="doc-links-panel">
+        <h3>Deeper Product + Architecture References</h3>
+        <div class="doc-links-grid">
+          <a href="product_plan.md"><i class="fa-solid fa-bullseye"></i> Product Plan</a>
+          <a href="system_design.md"><i class="fa-solid fa-diagram-project"></i> System Design</a>
+          <a href="market_gap.md"><i class="fa-solid fa-magnifying-glass-chart"></i> Market Gap Analysis</a>
+          <a href="#documentation"><i class="fa-solid fa-book"></i> Documentation Section</a>
+        </div>
+      </article>
+
+      <article class="doc-deep-dive">
+        <h3>Release Score Formula</h3>
+        <p>
+          ContractOps combines deterministic contract integrity with behavior similarity to prevent
+          both brittle false negatives and permissive false positives.
+        </p>
+        <pre><code>release_score = (contract_pass_rate * 70) + (similarity_to_baseline * 30)</code></pre>
+        <p>
+          A release passes only if hard checks pass, similarity remains in tolerance (when baseline
+          exists), and score exceeds the environment threshold.
+        </p>
+      </article>
+    </section>
+
+    <section id="roadmap" class="section">
+      <div class="section-header">
+        <p class="eyebrow">Roadmap</p>
+        <h2>Delivery timeline and future status board</h2>
+      </div>
+
+      <div class="roadmap-grid">
+        <article class="roadmap-card">
+          <p class="status status-done">Shipped</p>
+          <h3>Phase 1 — Developer Wedge</h3>
+          <ul>
+            <li>CLI runner and scenario contracts</li>
+            <li>Baseline replay and release scoring</li>
+            <li>GitHub Action integration</li>
+            <li>Local + S3 + GCS baseline backends</li>
+          </ul>
+        </article>
+        <article class="roadmap-card">
+          <p class="status status-progress">In Progress</p>
+          <h3>Phase 2 — Team Adoption</h3>
+          <ul>
+            <li>Scenario registry and governance tagging</li>
+            <li>Environment reliability budgets</li>
+            <li>Notification hooks for failed gates</li>
+            <li>Run-history usability improvements</li>
+          </ul>
+        </article>
+        <article class="roadmap-card">
+          <p class="status status-next">Next</p>
+          <h3>Phase 3 — Enterprise Motion</h3>
+          <ul>
+            <li>SSO, RBAC, and audit trail exports</li>
+            <li>Policy packs by industry vertical</li>
+            <li>Organization-wide reliability dashboards</li>
+            <li>Approval workflows for high-risk drift</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="future-board">
+        <article>
+          <h4><i class="fa-solid fa-bolt"></i> Now</h4>
+          <p>Strengthen CI gate ergonomics and team-level adoption patterns.</p>
+          <div class="progress"><span style="width: 72%"></span></div>
+        </article>
+        <article>
+          <h4><i class="fa-solid fa-forward"></i> Next</h4>
+          <p>Launch governance workflows and richer integration surfaces.</p>
+          <div class="progress"><span style="width: 46%"></span></div>
+        </article>
+        <article>
+          <h4><i class="fa-solid fa-lightbulb"></i> Future</h4>
+          <p>Build enterprise policy intelligence and risk analytics control plane.</p>
+          <div class="progress"><span style="width: 24%"></span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section final-cta">
+      <h2>Make AI releases as safe and measurable as software releases.</h2>
+      <p>
+        ContractOps is purpose-built for teams that need deterministic release governance across
+        models, prompts, tools, and orchestration.
+      </p>
+      <a class="btn btn-primary" href="#documentation">
+        <i class="fa-solid fa-arrow-right"></i> Implement ContractOps Workflow
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <p>ContractOps • CI-grade behavior contracts, baseline replay, and release gates for AI agents.</p>
+    <p class="footer-meta">Built for GitHub Pages deployment.</p>
+  </footer>
+</body>
+</html>
