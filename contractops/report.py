@@ -120,8 +120,24 @@ def render_suite_markdown(suite: SuiteResult, min_similarity: float, min_score: 
         f"- Failed: `{suite.failed_count}`",
         f"- Average score: `{suite.score:.1f}`",
         f"- Pass rate: `{suite.pass_rate:.0%}`",
-        "",
     ]
+
+    if suite.flaky_count > 0:
+        lines.append(f"- Flaky scenarios: `{suite.flaky_count}`")
+
+    lines.append("")
+
+    if suite.flaky_scenarios():
+        lines.append("## Flaky Scenarios (Unstable)")
+        lines.append("")
+        for s in suite.flaky_scenarios():
+            stab = s.stability
+            assert stab is not None
+            lines.append(
+                f"- `{s.scenario_id}`: {stab.trials_passed}/{stab.trials_run} trials passed, "
+                f"score stddev {stab.score_stddev:.1f} -- {stab.flaky_reason}"
+            )
+        lines.append("")
 
     if suite.failed_scenarios():
         lines.append("## Failed Scenarios")
@@ -133,19 +149,49 @@ def render_suite_markdown(suite: SuiteResult, min_similarity: float, min_score: 
             for check in s.checks:
                 if not check["passed"]:
                     lines.append(f"  - [FAIL] `{check['name']}` - {check['detail']}")
+            if s.stability is not None:
+                lines.append(
+                    f"  - Stability: {s.stability.trials_passed}/{s.stability.trials_run} "
+                    f"passed, mean score {s.stability.mean_score:.1f}, "
+                    f"stddev {s.stability.score_stddev:.1f}"
+                )
             lines.append("")
 
     lines.append("## All Scenarios")
     lines.append("")
-    lines.append("| Scenario | Status | Score | Contract Rate | Similarity | Latency |")
-    lines.append("|----------|--------|-------|---------------|------------|---------|")
+    has_stability = any(s.stability is not None for s in suite.scenarios)
+    if has_stability:
+        lines.append(
+            "| Scenario | Status | Score | Contract Rate | Similarity "
+            "| Latency | Trials | Stability |"
+        )
+        lines.append(
+            "|----------|--------|-------|---------------|------------|"
+            "---------|--------|-----------|"
+        )
+    else:
+        lines.append("| Scenario | Status | Score | Contract Rate | Similarity | Latency |")
+        lines.append("|----------|--------|-------|---------------|------------|---------|")
+
     for s in suite.scenarios:
         st = "PASS" if s.passed else "FAIL"
         sim = "n/a" if s.similarity is None else f"{s.similarity:.3f}"
-        lines.append(
+        base = (
             f"| `{s.scenario_id}` | {st} | {s.score} | "
-            f"{s.contract_pass_rate:.0%} | {sim} | {s.latency_ms}ms |"
+            f"{s.contract_pass_rate:.0%} | {sim} | {s.latency_ms}ms"
         )
+        if has_stability:
+            if s.stability is not None:
+                stab_str = "FLAKY" if s.stability.is_flaky else "STABLE"
+                base += (
+                    f" | {s.stability.trials_passed}/{s.stability.trials_run} "
+                    f"| {stab_str} |"
+                )
+            else:
+                base += " | 1/1 | STABLE |"
+        else:
+            base += " |"
+        lines.append(base)
 
     return "\n".join(lines)
 

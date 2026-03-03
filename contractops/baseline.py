@@ -1,10 +1,12 @@
 """Baseline capture, persistence, and comparison.
 
 Uses the storage abstraction layer for backend-agnostic persistence.
+Supports both string-diff similarity and embedding-based semantic similarity.
 """
 
 from __future__ import annotations
 
+import logging
 from dataclasses import asdict
 from datetime import datetime, timezone
 from difflib import SequenceMatcher, unified_diff
@@ -13,6 +15,8 @@ from typing import Any
 
 from contractops.models import RunResult
 from contractops.storage import BaselineStorage
+
+logger = logging.getLogger("contractops.baseline")
 
 
 def baseline_key(scenario_id: str) -> str:
@@ -88,8 +92,17 @@ def compare_outputs(
     baseline_output: str,
     candidate_output: str,
     max_diff_lines: int = 14,
+    use_semantic: bool = False,
+    embed_model: str = "",
+    embed_url: str = "",
 ) -> dict[str, Any]:
-    similarity = SequenceMatcher(
+    """Compare baseline and candidate outputs.
+
+    When *use_semantic* is True, computes embedding-based cosine similarity
+    via Ollama in addition to the string-diff similarity (which is kept for
+    explainability). The semantic score becomes the primary similarity metric.
+    """
+    string_similarity = SequenceMatcher(
         None,
         _normalize(baseline_output),
         _normalize(candidate_output),
@@ -105,11 +118,32 @@ def compare_outputs(
         )
     )
     preview = diff_lines[:max_diff_lines]
-    return {
-        "similarity": round(similarity, 6),
+
+    result: dict[str, Any] = {
+        "string_similarity": round(string_similarity, 6),
         "diff_preview": preview,
         "diff_truncated": len(diff_lines) > max_diff_lines,
     }
+
+    if use_semantic:
+        try:
+            from contractops.embeddings import semantic_similarity
+
+            kwargs: dict[str, str] = {}
+            if embed_model:
+                kwargs["model"] = embed_model
+            if embed_url:
+                kwargs["base_url"] = embed_url
+            sem_sim = semantic_similarity(baseline_output, candidate_output, **kwargs)
+            result["semantic_similarity"] = round(sem_sim, 6)
+            result["similarity"] = result["semantic_similarity"]
+        except Exception as exc:
+            logger.warning("Semantic similarity failed, falling back to string: %s", exc)
+            result["similarity"] = result["string_similarity"]
+    else:
+        result["similarity"] = result["string_similarity"]
+
+    return result
 
 
 def _build_payload(result: RunResult) -> dict[str, Any]:

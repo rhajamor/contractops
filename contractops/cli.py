@@ -92,12 +92,79 @@ def _build_parser() -> argparse.ArgumentParser:
         "--format", choices=["markdown", "json", "junit", "github"], default="",
     )
     run_cmd.add_argument("--output", default="", help="Write report to file instead of stdout.")
+    run_cmd.add_argument(
+        "--trials", type=int, default=1,
+        help="Number of trials per scenario for stability testing.",
+    )
+    run_cmd.add_argument(
+        "--pass-threshold", type=float, default=1.0,
+        help="Required trial pass rate (0.0-1.0) when using --trials.",
+    )
+    run_cmd.add_argument(
+        "--semantic", action="store_true",
+        help="Use embedding-based semantic similarity for baseline comparison.",
+    )
+    run_cmd.add_argument(
+        "--embed-model", default="",
+        help="Ollama model for embeddings (default: llama3.1:8b).",
+    )
+    run_cmd.add_argument(
+        "--embed-url", default="",
+        help="Ollama base URL for embeddings (default: http://localhost:11434).",
+    )
     run_cmd.set_defaults(func=cmd_run)
 
     # --- validate ---
     validate_cmd = subparsers.add_parser("validate", help="Validate scenario files.")
     validate_cmd.add_argument("paths", nargs="+", help="Scenario files or directories to validate.")
     validate_cmd.set_defaults(func=cmd_validate)
+
+    # --- packs ---
+    packs_cmd = subparsers.add_parser("packs", help="Manage policy packs.")
+    packs_sub = packs_cmd.add_subparsers(dest="packs_action", required=True)
+
+    packs_list = packs_sub.add_parser("list", help="List available policy packs.")
+    packs_list.set_defaults(func=cmd_packs_list)
+
+    packs_run = packs_sub.add_parser("run", help="Run a policy pack against an executor.")
+    packs_run.add_argument("pack", help="Pack name (e.g. owasp, hipaa, pii-gdpr, financial).")
+    packs_run.add_argument("--executor", default="", help="Executor to use.")
+    packs_run.add_argument("--format", choices=["markdown", "json", "junit"], default="markdown")
+    packs_run.add_argument("--min-score", type=int, default=0)
+    packs_run.add_argument("--min-similarity", type=float, default=0.0)
+    packs_run.add_argument("--trials", type=int, default=1)
+    packs_run.set_defaults(func=cmd_packs_run)
+
+    packs_export = packs_sub.add_parser("export", help="Export a pack as scenario files.")
+    packs_export.add_argument("pack", help="Pack name to export.")
+    packs_export.add_argument("--output-dir", default="scenarios", help="Output directory.")
+    packs_export.set_defaults(func=cmd_packs_export)
+
+    # --- lifecycle ---
+    lc_cmd = subparsers.add_parser("lifecycle", help="Manage baseline lifecycle.")
+    lc_sub = lc_cmd.add_subparsers(dest="lifecycle_action", required=True)
+
+    lc_approve = lc_sub.add_parser("approve", help="Approve a baseline for release gating.")
+    lc_approve.add_argument("--scenario-id", required=True)
+    lc_approve.add_argument("--approver", default="cli-user")
+    lc_approve.add_argument("--baseline-dir", default="")
+    lc_approve.set_defaults(func=cmd_lifecycle_approve)
+
+    lc_expire = lc_sub.add_parser("expire", help="Expire a baseline.")
+    lc_expire.add_argument("--scenario-id", required=True)
+    lc_expire.add_argument("--reason", default="")
+    lc_expire.add_argument("--baseline-dir", default="")
+    lc_expire.set_defaults(func=cmd_lifecycle_expire)
+
+    lc_status = lc_sub.add_parser("status", help="Show lifecycle status of a baseline.")
+    lc_status.add_argument("--scenario-id", required=True)
+    lc_status.add_argument("--baseline-dir", default="")
+    lc_status.set_defaults(func=cmd_lifecycle_status)
+
+    lc_history = lc_sub.add_parser("history", help="Show version history.")
+    lc_history.add_argument("--scenario-id", required=True)
+    lc_history.add_argument("--baseline-dir", default="")
+    lc_history.set_defaults(func=cmd_lifecycle_history)
 
     return parser
 
@@ -232,6 +299,11 @@ def cmd_run(args: argparse.Namespace) -> int:
         min_score=min_score,
         require_baseline=require_baseline,
         parallel=args.parallel,
+        trials=getattr(args, "trials", 1),
+        pass_threshold=getattr(args, "pass_threshold", 1.0),
+        use_semantic=getattr(args, "semantic", False),
+        embed_model=getattr(args, "embed_model", ""),
+        embed_url=getattr(args, "embed_url", ""),
     )
 
     output_text = _render_suite(suite_result, output_format, min_similarity, min_score)
@@ -288,6 +360,111 @@ def cmd_validate(args: argparse.Namespace) -> int:
 
     print(f"\nValidated {total} files: {total - errors_found} OK, {errors_found} errors.")
     return 0 if errors_found == 0 else 1
+
+
+# ---------------------------------------------------------------------------
+# Packs commands
+# ---------------------------------------------------------------------------
+
+def cmd_packs_list(args: argparse.Namespace) -> int:
+    from contractops.policy_packs import get_pack, list_packs
+
+    packs = list_packs()
+    print("Available policy packs:\n")
+    for name in packs:
+        scenarios = get_pack(name)
+        print(f"  {name:20s}  {len(scenarios)} scenarios")
+    print(f"\nTotal: {len(packs)} packs")
+    return 0
+
+
+def cmd_packs_run(args: argparse.Namespace) -> int:
+    from contractops.policy_packs import load_pack_scenarios
+
+    config = _load_merged_config(args)
+    executor_name = args.executor or config.default_executor
+    executor = build_executor(executor_name)
+    scenarios = load_pack_scenarios(args.pack)
+
+    suite_result = run_suite(
+        scenarios=scenarios,
+        executor=executor,
+        min_similarity=args.min_similarity,
+        min_score=args.min_score,
+        trials=args.trials,
+    )
+
+    output_text = _render_suite(suite_result, args.format, args.min_similarity, args.min_score)
+    print(output_text)
+    return 0 if suite_result.passed else 1
+
+
+def cmd_packs_export(args: argparse.Namespace) -> int:
+    from contractops.policy_packs import get_pack
+
+    pack_data = get_pack(args.pack)
+    output_dir = Path(args.output_dir) / args.pack
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for scenario_raw in pack_data:
+        filename = f"{scenario_raw['id']}.json"
+        filepath = output_dir / filename
+        filepath.write_text(json.dumps(scenario_raw, indent=2), encoding="utf-8")
+        print(f"  Exported: {filepath}")
+
+    print(f"\nExported {len(pack_data)} scenarios to {output_dir}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Lifecycle commands
+# ---------------------------------------------------------------------------
+
+def cmd_lifecycle_approve(args: argparse.Namespace) -> int:
+    from contractops.lifecycle import BaselineLifecycle
+
+    config = _load_merged_config(args)
+    storage = _build_storage(args, config)
+    lc = BaselineLifecycle(storage)
+    meta = lc.approve(args.scenario_id, approver=args.approver)
+    print(json.dumps(meta, indent=2, default=str))
+    return 0
+
+
+def cmd_lifecycle_expire(args: argparse.Namespace) -> int:
+    from contractops.lifecycle import BaselineLifecycle
+
+    config = _load_merged_config(args)
+    storage = _build_storage(args, config)
+    lc = BaselineLifecycle(storage)
+    meta = lc.expire(args.scenario_id, reason=args.reason)
+    print(json.dumps(meta, indent=2, default=str))
+    return 0
+
+
+def cmd_lifecycle_status(args: argparse.Namespace) -> int:
+    from contractops.lifecycle import BaselineLifecycle
+
+    config = _load_merged_config(args)
+    storage = _build_storage(args, config)
+    lc = BaselineLifecycle(storage)
+    meta = lc.get_state(args.scenario_id)
+    print(json.dumps(meta, indent=2, default=str))
+    return 0
+
+
+def cmd_lifecycle_history(args: argparse.Namespace) -> int:
+    from contractops.lifecycle import BaselineLifecycle
+
+    config = _load_merged_config(args)
+    storage = _build_storage(args, config)
+    lc = BaselineLifecycle(storage)
+    history = lc.list_versions(args.scenario_id)
+    if not history:
+        print("No version history found.")
+    else:
+        print(json.dumps(history, indent=2, default=str))
+    return 0
 
 
 # ---------------------------------------------------------------------------

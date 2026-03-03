@@ -56,6 +56,39 @@ class ContractEvaluation:
 
 
 @dataclass
+class TrialResult:
+    """Result of a single trial within a multi-trial run."""
+
+    trial_index: int
+    passed: bool
+    score: int
+    contract_pass_rate: float
+    similarity: float | None
+    latency_ms: int
+    output: str
+
+
+@dataclass
+class StabilityMetrics:
+    """Statistical metrics across multiple trials of the same scenario."""
+
+    trials_run: int
+    trials_passed: int
+    pass_rate: float
+    mean_score: float
+    score_variance: float
+    score_stddev: float
+    mean_latency_ms: float
+    latency_variance: float
+    is_flaky: bool
+    flaky_reason: str
+    trial_results: list[TrialResult] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
 class ScenarioReport:
     """Full result for a single scenario run."""
 
@@ -72,6 +105,7 @@ class ScenarioReport:
     diff_preview: list[str]
     diff_truncated: bool
     tool_calls: list[str]
+    stability: StabilityMetrics | None = None
 
 
 @dataclass
@@ -84,6 +118,7 @@ class SuiteResult:
     failed_count: int
     score: float
     scenarios: list[ScenarioReport] = field(default_factory=list)
+    flaky_count: int = 0
 
     @property
     def pass_rate(self) -> float:
@@ -93,3 +128,9 @@ class SuiteResult:
 
     def failed_scenarios(self) -> list[ScenarioReport]:
         return [s for s in self.scenarios if not s.passed]
+
+    def flaky_scenarios(self) -> list[ScenarioReport]:
+        return [
+            s for s in self.scenarios
+            if s.stability is not None and s.stability.is_flaky
+        ]
