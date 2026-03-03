@@ -274,7 +274,38 @@ def render_github_comment(suite: SuiteResult, min_similarity: float, min_score: 
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+def render_single_junit_xml(report: dict[str, Any]) -> str:
+    """Render a single-scenario report as JUnit XML."""
+    root = Element("testsuites")
+    root.set("name", "contractops")
+    root.set("tests", "1")
+    root.set("failures", "0" if report["passed"] else "1")
+    root.set("errors", "0")
+
+    ts = SubElement(root, "testsuite")
+    ts.set("name", "contractops")
+    ts.set("tests", "1")
+    ts.set("failures", "0" if report["passed"] else "1")
+
+    tc = SubElement(ts, "testcase")
+    tc.set("name", report["scenario_id"])
+    tc.set("classname", f"contractops.{report['executor']}")
+    tc.set("time", str(report["latency_ms"] / 1000.0))
+
+    if not report["passed"]:
+        failure = SubElement(tc, "failure")
+        failure.set("message", "; ".join(report["reasons"]))
+        failure_details: list[str] = []
+        for check in report["checks"]:
+            if not check["passed"]:
+                failure_details.append(f"[FAIL] {check['name']}: {check['detail']}")
+        failure.text = "\n".join(failure_details)
+
+    return tostring(root, encoding="unicode", xml_declaration=True)
+
+
 def _score_release(contract_pass_rate: float, similarity: float | None) -> int:
-    similarity_component = 1.0 if similarity is None else similarity
-    raw_score = (contract_pass_rate * 70.0) + (similarity_component * 30.0)
+    if similarity is None:
+        return int(round(contract_pass_rate * 100.0))
+    raw_score = (contract_pass_rate * 70.0) + (similarity * 30.0)
     return int(round(raw_score))

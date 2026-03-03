@@ -108,15 +108,22 @@ runs:
         fi
 
         CMD_ARGS="$CMD_ARGS --baseline-dir $CONTRACTOPS_BASELINE_DIR"
-        CMD_ARGS="$CMD_ARGS --min-similarity $CONTRACTOPS_MIN_SIMILARITY"
-        CMD_ARGS="$CMD_ARGS --min-score $CONTRACTOPS_MIN_SCORE"
 
-        if [ "$CONTRACTOPS_REQUIRE_BASELINE" = "true" ]; then
-          CMD_ARGS="$CMD_ARGS --require-baseline"
+        if [ "$CONTRACTOPS_CMD" != "baseline" ]; then
+          CMD_ARGS="$CMD_ARGS --min-similarity $CONTRACTOPS_MIN_SIMILARITY"
+          CMD_ARGS="$CMD_ARGS --min-score $CONTRACTOPS_MIN_SCORE"
+
+          if [ "$CONTRACTOPS_REQUIRE_BASELINE" = "true" ]; then
+            CMD_ARGS="$CMD_ARGS --require-baseline"
+          fi
         fi
 
-        if [ -n "$CONTRACTOPS_FORMAT" ]; then
-          CMD_ARGS="$CMD_ARGS --format $CONTRACTOPS_FORMAT"
+        if [ "$CONTRACTOPS_CMD" != "baseline" ] && [ -n "$CONTRACTOPS_FORMAT" ]; then
+          SAFE_FMT="$CONTRACTOPS_FORMAT"
+          if [ "$CONTRACTOPS_CMD" = "check" ] && [ "$SAFE_FMT" = "github" ]; then
+            SAFE_FMT="markdown"
+          fi
+          CMD_ARGS="$CMD_ARGS --format $SAFE_FMT"
         fi
 
         REPORT=$(python -m contractops.cli $CMD_ARGS 2>&1)
@@ -131,6 +138,16 @@ runs:
         else
           echo "passed=false" >> $GITHUB_OUTPUT
         fi
+
+        SCORE=$(python -c "
+import json, sys
+try:
+    data = json.loads('''$REPORT''')
+    print(int(data.get('score', 0)))
+except Exception:
+    print(100 if $EXIT_CODE == 0 else 0)
+" 2>/dev/null || echo "0")
+        echo "score=$SCORE" >> $GITHUB_OUTPUT
 
         echo "$REPORT"
         exit $EXIT_CODE

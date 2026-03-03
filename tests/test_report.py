@@ -11,6 +11,7 @@ from contractops.report import (
     render_github_comment,
     render_junit_xml,
     render_markdown,
+    render_single_junit_xml,
     render_suite_markdown,
 )
 
@@ -46,6 +47,20 @@ class TestBuildReleaseReport:
         assert report["passed"] is True
         assert report["score"] == 100
         assert report["similarity"] is None
+
+    def test_score_without_baseline_reflects_contracts_only(self):
+        half_pass = ContractEvaluation(
+            passed=False,
+            checks=[
+                CheckResult("a", True, "ok"),
+                CheckResult("b", False, "fail"),
+            ],
+        )
+        report = build_release_report(
+            _make_scenario(), _make_run_result(), half_pass,
+            baseline_comparison=None, min_similarity=0.85, min_score=80,
+        )
+        assert report["score"] == 50
 
     def test_passing_with_baseline(self):
         report = build_release_report(
@@ -161,6 +176,30 @@ class TestRenderJunitXml:
         assert "testsuites" in xml
         assert "testcase" in xml
         assert 'name="s2"' in xml
+        assert "failure" in xml
+
+
+class TestRenderSingleJunitXml:
+    def test_passing_report(self):
+        report = build_release_report(
+            _make_scenario(), _make_run_result(), _make_eval(True),
+            baseline_comparison=None, min_similarity=0.85, min_score=80,
+        )
+        xml = render_single_junit_xml(report)
+        assert "<?xml" in xml
+        assert "testsuites" in xml
+        assert "testcase" in xml
+        assert 'name="test-scenario"' in xml
+        assert 'failures="0"' in xml
+        assert "<failure" not in xml
+
+    def test_failing_report(self):
+        report = build_release_report(
+            _make_scenario(), _make_run_result(), _make_eval(False),
+            baseline_comparison=None, min_similarity=0.85, min_score=80,
+        )
+        xml = render_single_junit_xml(report)
+        assert "<?xml" in xml
         assert "failure" in xml
 
 

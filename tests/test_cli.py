@@ -184,9 +184,110 @@ class TestCmdValidate:
         assert code == 1
 
 
+class TestCmdCheckJunit:
+    def test_check_junit_produces_xml(self, tmp_dir: Path, capsys):
+        code = main([
+            "check",
+            "--scenario", str(CUSTOMER_SCENARIO_PATH),
+            "--executor", "mock-v1",
+            "--baseline-dir", str(tmp_dir),
+            "--format", "junit",
+        ])
+        assert code == 0
+        output = capsys.readouterr().out
+        assert "<?xml" in output
+        assert "testsuites" in output
+        assert "testcase" in output
+
+
+class TestBaselineFile:
+    def test_baseline_file_save_and_check(self, tmp_dir: Path):
+        bf = str(tmp_dir / "my_baseline.json")
+        code = main([
+            "baseline",
+            "--scenario", str(CUSTOMER_SCENARIO_PATH),
+            "--executor", "mock-v1",
+            "--baseline-file", bf,
+        ])
+        assert code == 0
+        assert Path(bf).exists()
+
+        code = main([
+            "check",
+            "--scenario", str(CUSTOMER_SCENARIO_PATH),
+            "--executor", "mock-v1",
+            "--baseline-file", bf,
+        ])
+        assert code == 0
+
+
+class TestLifecycleEnforcement:
+    def test_expired_baseline_fails_require_baseline(
+        self, tmp_dir: Path,
+    ):
+        bl_dir = str(tmp_dir / "baselines")
+        main([
+            "baseline",
+            "--scenario", str(CUSTOMER_SCENARIO_PATH),
+            "--executor", "mock-v1",
+            "--baseline-dir", bl_dir,
+        ])
+        main([
+            "lifecycle", "expire",
+            "--scenario-id", "customer-refund-enterprise",
+            "--baseline-dir", bl_dir,
+            "--reason", "outdated",
+        ])
+        code = main([
+            "check",
+            "--scenario", str(CUSTOMER_SCENARIO_PATH),
+            "--executor", "mock-v1",
+            "--baseline-dir", bl_dir,
+            "--require-baseline",
+        ])
+        assert code == 1
+
+    def test_approved_baseline_passes(self, tmp_dir: Path):
+        bl_dir = str(tmp_dir / "baselines")
+        main([
+            "baseline",
+            "--scenario", str(CUSTOMER_SCENARIO_PATH),
+            "--executor", "mock-v1",
+            "--baseline-dir", bl_dir,
+        ])
+        main([
+            "lifecycle", "approve",
+            "--scenario-id", "customer-refund-enterprise",
+            "--baseline-dir", bl_dir,
+        ])
+        code = main([
+            "check",
+            "--scenario", str(CUSTOMER_SCENARIO_PATH),
+            "--executor", "mock-v1",
+            "--baseline-dir", bl_dir,
+            "--require-baseline",
+        ])
+        assert code == 0
+
+
+class TestRunJsonStability:
+    def test_json_includes_flaky_count(
+        self, tmp_dir: Path, capsys,
+    ):
+        main([
+            "run",
+            "--scenarios", str(EXAMPLES_DIR),
+            "--executor", "mock-v1",
+            "--baseline-dir", str(tmp_dir),
+            "--format", "json",
+        ])
+        output = capsys.readouterr().out
+        data = json.loads(output)
+        assert "flaky_count" in data
+
+
 class TestEndToEnd:
     def test_full_workflow(self, tmp_dir: Path):
-        """baseline -> check pass -> check fail, full lifecycle."""
         bl_code = main([
             "baseline",
             "--scenario", str(CUSTOMER_SCENARIO_PATH),

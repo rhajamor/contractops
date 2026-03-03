@@ -24,6 +24,7 @@ from contractops.report import (
     render_github_comment,
     render_junit_xml,
     render_markdown,
+    render_single_junit_xml,
     render_suite_markdown,
 )
 from contractops.scenario import load_scenario, load_scenarios_from_dir, validate_scenario
@@ -59,6 +60,7 @@ def _build_parser() -> argparse.ArgumentParser:
     baseline_cmd.add_argument("--executor", default="", help="Executor to run.")
     baseline_cmd.add_argument("--baseline-dir", default="", help="Baseline storage directory.")
     baseline_cmd.add_argument("--baseline-file", default="", help="Explicit baseline file path.")
+    baseline_cmd.add_argument("--url", default="", help="URL for HTTP executor.")
     baseline_cmd.set_defaults(func=cmd_baseline)
 
     # --- check ---
@@ -75,6 +77,13 @@ def _build_parser() -> argparse.ArgumentParser:
         "--format", choices=["markdown", "json", "junit"], default="",
         help="Output format.",
     )
+    check_cmd.add_argument("--url", default="", help="URL for HTTP executor.")
+    check_cmd.add_argument(
+        "--semantic", action="store_true",
+        help="Use embedding-based semantic similarity for baseline comparison.",
+    )
+    check_cmd.add_argument("--embed-model", default="", help="Ollama model for embeddings.")
+    check_cmd.add_argument("--embed-url", default="", help="Ollama base URL for embeddings.")
     check_cmd.set_defaults(func=cmd_check)
 
     # --- run (batch) ---
@@ -112,6 +121,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--embed-url", default="",
         help="Ollama base URL for embeddings (default: http://localhost:11434).",
     )
+    run_cmd.add_argument("--url", default="", help="URL for HTTP executor.")
     run_cmd.set_defaults(func=cmd_run)
 
     # --- validate ---
@@ -204,11 +214,17 @@ def cmd_baseline(args: argparse.Namespace) -> int:
     config = _load_merged_config(args)
     executor_name = args.executor or config.baseline_executor
     scenario = load_scenario(args.scenario)
-    executor = build_executor(executor_name)
+    executor = _build_executor_with_url(executor_name, args)
     result = executor.run(scenario)
 
-    storage = _build_storage(args, config)
-    location = save_baseline(result, storage=storage)
+    baseline_file = getattr(args, "baseline_file", "") or ""
+    if baseline_file:
+        location = save_baseline(result, path=Path(baseline_file))
+    else:
+        storage = _build_storage(args, config)
+        location = save_baseline(result, storage=storage)
+
+    _audit_baseline_save(scenario.id, result.executor, location)
 
     print(
         json.dumps(
@@ -236,24 +252,47 @@ def cmd_check(args: argparse.Namespace) -> int:
     min_score = args.min_score if args.min_score is not None else threshold.min_score
     require_baseline = args.require_baseline or threshold.require_baseline
     output_format = args.format or config.output_format
+    use_semantic = getattr(args, "semantic", False)
+    embed_model = getattr(args, "embed_model", "")
+    embed_url = getattr(args, "embed_url", "")
 
     scenario = load_scenario(args.scenario)
-    executor = build_executor(executor_name)
+    executor = _build_executor_with_url(executor_name, args)
     result = executor.run(scenario)
     contract_eval = evaluate_contracts(scenario, result)
 
-    storage = _build_storage(args, config)
+    storage = _resolve_storage(args, config)
     baseline_comparison = None
 
-    if baseline_exists(scenario_id=scenario.id, storage=storage):
-        payload = load_baseline(scenario_id=scenario.id, storage=storage)
-        baseline_output = str(payload["run_result"]["output"])
-        baseline_comparison = compare_outputs(baseline_output, result.output)
-    elif require_baseline:
+    has_baseline = _check_baseline_available(
+        scenario.id, storage, args,
+    )
+
+    if has_baseline is None and require_baseline:
         print(
             json.dumps({"passed": False, "error": f"Baseline not found for '{scenario.id}'."}),
         )
         return 1
+    if has_baseline is False and require_baseline:
+        print(
+            json.dumps({
+                "passed": False,
+                "error": f"Baseline for '{scenario.id}' is expired and cannot be used for gating.",
+            }),
+        )
+        return 1
+
+    if has_baseline is True:
+        baseline_file = getattr(args, "baseline_file", "") or ""
+        if baseline_file and Path(baseline_file).exists():
+            payload = load_baseline(path=Path(baseline_file))
+        else:
+            payload = load_baseline(scenario_id=scenario.id, storage=storage)
+        baseline_output = str(payload["run_result"]["output"])
+        baseline_comparison = compare_outputs(
+            baseline_output, result.output,
+            use_semantic=use_semantic, embed_model=embed_model, embed_url=embed_url,
+        )
 
     report = build_release_report(
         scenario=scenario,
@@ -262,6 +301,11 @@ def cmd_check(args: argparse.Namespace) -> int:
         baseline_comparison=baseline_comparison,
         min_similarity=min_similarity,
         min_score=min_score,
+    )
+
+    _audit_gate_decision(
+        scenario.id, report["passed"], report["score"],
+        result.executor, report["reasons"],
     )
 
     _emit_single_report(report, output_format, min_similarity, min_score, baseline_comparison)
@@ -289,7 +333,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 1
 
     storage = _build_storage(args, config)
-    executor = build_executor(executor_name)
+    executor = _build_executor_with_url(executor_name, args)
 
     suite_result = run_suite(
         scenarios=scenarios,
@@ -305,6 +349,8 @@ def cmd_run(args: argparse.Namespace) -> int:
         embed_model=getattr(args, "embed_model", ""),
         embed_url=getattr(args, "embed_url", ""),
     )
+
+    _audit_suite_decisions(suite_result)
 
     output_text = _render_suite(suite_result, output_format, min_similarity, min_score)
 
@@ -476,7 +522,9 @@ def _load_merged_config(args: argparse.Namespace) -> Config:
     return load_config(config_path)
 
 
-def _build_storage(args: argparse.Namespace, config: Config) -> LocalStorage:
+def _build_storage(
+    args: argparse.Namespace, config: Config,
+) -> Any:
     baseline_dir = getattr(args, "baseline_dir", "") or ""
     if baseline_dir:
         return LocalStorage(baseline_dir)
@@ -489,6 +537,52 @@ def _build_storage(args: argparse.Namespace, config: Config) -> LocalStorage:
     )
 
 
+def _resolve_storage(
+    args: argparse.Namespace, config: Config,
+) -> Any:
+    """Build storage, preferring --baseline-file's parent dir."""
+    baseline_file = getattr(args, "baseline_file", "") or ""
+    if baseline_file:
+        return LocalStorage(str(Path(baseline_file).parent))
+    return _build_storage(args, config)
+
+
+def _build_executor_with_url(executor_name: str, args: argparse.Namespace) -> Any:
+    """Build executor, forwarding --url to the HTTP executor if needed."""
+    url = getattr(args, "url", "") or ""
+    if executor_name.strip().lower().startswith("http") and url:
+        return build_executor(executor_name, url=url)
+    return build_executor(executor_name)
+
+
+def _check_baseline_available(
+    scenario_id: str,
+    storage: Any,
+    args: argparse.Namespace,
+) -> bool | None:
+    """Check if a usable (non-expired) baseline exists.
+
+    Returns True if baseline exists and is usable, False if it
+    exists but is expired, None if it does not exist at all.
+    """
+    bf = getattr(args, "baseline_file", "") or ""
+    if bf and Path(bf).exists():
+        return True
+
+    if not baseline_exists(
+        scenario_id=scenario_id, storage=storage,
+    ):
+        return None
+
+    from contractops.lifecycle import BaselineLifecycle
+    lc = BaselineLifecycle(storage)
+    state = lc.get_state(scenario_id)
+    if state.get("state") == "expired":
+        return False
+
+    return True
+
+
 def _emit_single_report(
     report: dict[str, Any],
     fmt: str,
@@ -498,6 +592,8 @@ def _emit_single_report(
 ) -> None:
     if fmt == "json":
         print(json.dumps(report, indent=2))
+    elif fmt == "junit":
+        print(render_single_junit_xml(report))
     else:
         if baseline_comparison is None:
             print("No baseline found. Similarity gate skipped for this run.")
@@ -518,28 +614,90 @@ def _render_suite(
 
 
 def _suite_to_dict(suite: SuiteResult) -> dict[str, Any]:
-    return {
+    result: dict[str, Any] = {
         "passed": suite.passed,
         "total": suite.total,
         "passed_count": suite.passed_count,
         "failed_count": suite.failed_count,
         "score": suite.score,
         "pass_rate": suite.pass_rate,
-        "scenarios": [
-            {
-                "scenario_id": s.scenario_id,
-                "passed": s.passed,
-                "score": s.score,
-                "contract_pass_rate": s.contract_pass_rate,
-                "similarity": s.similarity,
-                "latency_ms": s.latency_ms,
-                "executor": s.executor,
-                "reasons": s.reasons,
-                "checks": s.checks,
-            }
-            for s in suite.scenarios
-        ],
+        "flaky_count": suite.flaky_count,
     }
+
+    scenario_list: list[dict[str, Any]] = []
+    for s in suite.scenarios:
+        entry: dict[str, Any] = {
+            "scenario_id": s.scenario_id,
+            "passed": s.passed,
+            "score": s.score,
+            "contract_pass_rate": s.contract_pass_rate,
+            "similarity": s.similarity,
+            "latency_ms": s.latency_ms,
+            "executor": s.executor,
+            "reasons": s.reasons,
+            "checks": s.checks,
+        }
+        if s.stability is not None:
+            entry["stability"] = {
+                "trials_run": s.stability.trials_run,
+                "trials_passed": s.stability.trials_passed,
+                "pass_rate": s.stability.pass_rate,
+                "mean_score": s.stability.mean_score,
+                "score_variance": s.stability.score_variance,
+                "score_stddev": s.stability.score_stddev,
+                "mean_latency_ms": s.stability.mean_latency_ms,
+                "is_flaky": s.stability.is_flaky,
+                "flaky_reason": s.stability.flaky_reason,
+            }
+        scenario_list.append(entry)
+
+    result["scenarios"] = scenario_list
+    return result
+
+
+def _audit_baseline_save(
+    scenario_id: str,
+    executor: str,
+    location: str,
+) -> None:
+    try:
+        from contractops.audit import AuditLog
+        audit = AuditLog()
+        audit.record_baseline_save(
+            scenario_id, executor, location,
+        )
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _audit_gate_decision(
+    scenario_id: str,
+    passed: bool,
+    score: int,
+    executor: str,
+    reasons: list[str],
+) -> None:
+    try:
+        from contractops.audit import AuditLog
+        audit = AuditLog()
+        audit.record_gate_decision(
+            scenario_id, passed, score, executor, reasons,
+        )
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _audit_suite_decisions(suite: SuiteResult) -> None:
+    try:
+        from contractops.audit import AuditLog
+        audit = AuditLog()
+        for s in suite.scenarios:
+            audit.record_gate_decision(
+                s.scenario_id, s.passed, s.score,
+                s.executor, s.reasons,
+            )
+    except Exception:  # noqa: BLE001
+        pass
 
 
 # ---------------------------------------------------------------------------
